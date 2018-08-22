@@ -1,0 +1,10 @@
+* {
+  border: 5px dotted blue;
+}
+img {
+  height: 100px;
+  width: 100px;
+  padding: 20px;
+  border: 5px dotted orange;
+  margin: 20px;
+}
