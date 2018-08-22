@@ -6,9 +6,9 @@ var numberImageDisplay = 3;
 var leftImage = document.getElementById('leftimage');
 var midImage = document.getElementById('midimage');
 var rightImage = document.getElementById('rightimage');
-var counterTable = document.getElementById('countertable');
+var counterList = document.getElementById('counterlist');
 var iterations = 0;
-let maxIterations = 25;
+var MAX_ITERATIONS = 26;
 
 
 //Create constructor function for SKUs named "Item"
@@ -20,33 +20,10 @@ function Item(name) {
   allItems.push(this);
 }
 
-// Here is where the new function for allItemTitles will eventually go
-
 //Fill Item constructor function
 allItemTitles.forEach(function(itemName) {
   new Item(itemName);
 });
-
-//Create table function to display click counts -- call later
-Item.prototype.fillTable = function (){
-  var tableRowElement = document.createElement('tr');
-  var tableCellElement = document.createElement('td');
-  tableCellElement.textContent = this.name;
-  tableRowElement.appendChild(tableCellElement);
-  tableCellElement = document.createElement('td');
-  tableCellElement.textContent = this.timesShown;
-  tableRowElement.appendChild(tableCellElement);
-  tableCellElement = document.createElement('td');
-  tableCellElement.textContent = this.timesSelected;
-  tableRowElement.appendChild(tableCellElement);
-  tableCellElement = document.createElement('td');
-  tableCellElement.textContent = (this.timesSelected)/(this.timesShown);
-  tableRowElement.appendChild(tableCellElement);
-  tableCellElement = document.createElement('td');
-  tableCellElement.textContent = (this.timesSelected)/iterations;
-  tableRowElement.appendChild(tableCellElement);
-  counterTable.appendChild(tableRowElement);
-};
 
 function generateNonRepeatingArray() {
   var rando = Math.floor(allItems.length*Math.random());
@@ -64,75 +41,66 @@ function generateNonRepeatingArray() {
   return compareArray;
 }
 
+//Create table function to display click counts -- call later
+Item.prototype.tabulateResults = function (){
+  var ulEl = document.createElement('ul');
+  var liEl = document.createElement('li');
+  liEl.textContent = `${this.name} was presented ${this.timesShown} times and selected ${this.timesSelected} times.`;
+  ulEl.appendChild(liEl);
+  counterList.appendChild(ulEl);
+};
+
+//Create function to render tabulated results
+function renderResults(){
+  for (var i=0; i<allItems.length; i++){
+    allItems[i].tabulateResults();
+  }
+}
+
 var imageArray = generateNonRepeatingArray(); //Defines imageArray outside of a function to be referenced in multiple functions
 
-function renderImages(event) {
+// Render three random images into specified HTML list items
+function renderImages() {
   leftImage.src = allItems[imageArray[0]].path;
   leftImage.title = allItems[imageArray[0]].name;
   allItems[imageArray[0]].timesShown++;
+
   midImage.src = allItems[imageArray[1]].path;
   midImage.title = allItems[imageArray[1]].name;
   allItems[imageArray[1]].timesShown++;
+
   rightImage.src = allItems[imageArray[2]].path;
   rightImage.title = allItems[imageArray[2]].name;
   allItems[imageArray[2]].timesShown++;
 }
-
 renderImages();
 
-
-// var headerArray = ['Item','# Times Presented','# Times Selected','Selection Rate','% of Selections'];
-// var tableRowElement = document.createElement('tr');
-// var tableHeaderElement = document.createElement('th');
-// for (var i=0; i<headerArray.length; i++) {
-//   tableHeaderElement.textConent = headerArray[i];
-//   tableRowElement.appendChild(tableHeaderElement);
-// }
-// counterTable.appendChild(tableRowElement);
-// for (i=0; i<allItems; i++){
-//   allItems[i].fillTable();
-// }
-
-
-leftImage.addEventListener('click', function(event) {
-  console.log(event.target);
-  console.log(iterations);
-  allItems[imageArray[0]].timesSelected++;
-  iterations++;
-  imageArray = generateNonRepeatingArray();
-  renderImages(event);
-});
-
-midImage.addEventListener('click', function(event) {
-  console.log(event.target);
-  console.log(iterations);
-  allItems[imageArray[1]].timesSelected++;
-  iterations++;
-  imageArray = generateNonRepeatingArray();
-  renderImages(event);
-});
-
-rightImage.addEventListener('click', function(event) {
-  console.log(event.target);
-  console.log(iterations);
-  allItems[imageArray[1]].timesSelected++;
-  iterations++;
-  imageArray = generateNonRepeatingArray();
-  renderImages(event);
-});
-
-function createItemTable (){
-  var headerArray = ['Item','# Times Presented','# Times Selected','Selection Rate','% of Selections'];
-  var tableRowElement = document.createElement('tr');
-  for (var i=0; i<headerArray.length; i++) {
-    var tableHeaderElement = document.createElement('th');
-    tableHeaderElement.textConent = headerArray[i];
-    tableRowElement.appendChild(tableHeaderElement);
-  }
-  counterTable.appendChild(tableRowElement);
-  for (i=0; i<allItems; i++){
-    allItems[i].fillTable();
-  }
+function killListeners(){
+  leftImage.removeEventListener('click', processClick);
+  midImage.removeEventListener('click', processClick);
+  rightImage.removeEventListener('click', processClick);
 }
 
-createItemTable();
+leftImage.addEventListener('click', processClick);
+
+midImage.addEventListener('click', processClick);
+
+rightImage.addEventListener('click', processClick);
+
+function processClick(event) {
+  for (var i=0; i<allItems.length; i++){
+    if (allItems[i].name === event.target.title) {
+      console.log(event.target.title);
+      allItems[i].timesSelected++;
+    }
+  }
+  imageArray = generateNonRepeatingArray();
+  renderImages();
+  iterations++;
+  console.log(iterations);
+
+  if (iterations === MAX_ITERATIONS) {
+    killListeners();
+    renderResults();
+  }
+}
