@@ -8,3 +8,7 @@ img {
   border: 5px dotted orange;
   margin: 20px;
 }
+
+li {
+  display: inline-block;
+}
