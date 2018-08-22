@@ -33,12 +33,16 @@ Item.prototype.fillTable = function (){
   var tableCellElement = document.createElement('td');
   tableCellElement.textContent = this.name;
   tableRowElement.appendChild(tableCellElement);
+  tableCellElement = document.createElement('td');
   tableCellElement.textContent = this.timesShown;
   tableRowElement.appendChild(tableCellElement);
+  tableCellElement = document.createElement('td');
   tableCellElement.textContent = this.timesSelected;
   tableRowElement.appendChild(tableCellElement);
+  tableCellElement = document.createElement('td');
   tableCellElement.textContent = (this.timesSelected)/(this.timesShown);
   tableRowElement.appendChild(tableCellElement);
+  tableCellElement = document.createElement('td');
   tableCellElement.textContent = (this.timesSelected)/iterations;
   tableRowElement.appendChild(tableCellElement);
   counterTable.appendChild(tableRowElement);
@@ -47,23 +51,15 @@ Item.prototype.fillTable = function (){
 function generateNonRepeatingArray() {
   var rando = Math.floor(allItems.length*Math.random());
   var compareArray = [];
-  var safety = 0;
-  for (var n=0; n<(numberImageDisplay); n++) {
-    if (numberImageDisplay>=allItems.length/3){
-      alert('Too many images to display for sample size');
-      numberImageDisplay = 3;
-    }else if (n===0){
-      compareArray.push(rando);
-      rando = Math.floor(allItems.length*Math.random());
-    } else if (compareArray[(n-1)] === rando && safety<100) {
-      n--;
-      safety++;
-      rando = Math.floor(allItems.length*Math.random());
-    } else {
-      compareArray.push(rando);
-      safety++;
-      rando = Math.floor(allItems.length*Math.random());
-    }
+  var feederArray = [];
+
+  for (var n=0; n<allItems.length; n++) {
+    feederArray.push(n);
+  }
+  for (var i=0; i<numberImageDisplay; i++){
+    compareArray.push(feederArray[rando]);
+    feederArray.splice(rando,1);
+    rando = Math.floor(feederArray.length*Math.random());
   }
   return compareArray;
 }
@@ -84,43 +80,59 @@ function renderImages(event) {
 
 renderImages();
 
-if (iterations<maxIterations) {
-  leftImage.addEventListener('click', function(event) {
-    console.log(event.target);
-    console.log(iterations);
-    allItems[imageArray[0]].timesSelected++;
-    iterations++;
-    imageArray = generateNonRepeatingArray();
-    renderImages(event);
-  });
 
-  midImage.addEventListener('click', function(event) {
-    console.log(event.target);
-    console.log(iterations);
-    allItems[imageArray[1]].timesSelected++;
-    iterations++;
-    imageArray = generateNonRepeatingArray();
-    renderImages(event);
-  });
+// var headerArray = ['Item','# Times Presented','# Times Selected','Selection Rate','% of Selections'];
+// var tableRowElement = document.createElement('tr');
+// var tableHeaderElement = document.createElement('th');
+// for (var i=0; i<headerArray.length; i++) {
+//   tableHeaderElement.textConent = headerArray[i];
+//   tableRowElement.appendChild(tableHeaderElement);
+// }
+// counterTable.appendChild(tableRowElement);
+// for (i=0; i<allItems; i++){
+//   allItems[i].fillTable();
+// }
 
-  rightImage.addEventListener('click', function(event) {
-    console.log(event.target);
-    console.log(iterations);
-    allItems[imageArray[1]].timesSelected++;
-    iterations++;
-    imageArray = generateNonRepeatingArray();
-    renderImages(event);
-  });
-} else {
+
+leftImage.addEventListener('click', function(event) {
+  console.log(event.target);
+  console.log(iterations);
+  allItems[imageArray[0]].timesSelected++;
+  iterations++;
+  imageArray = generateNonRepeatingArray();
+  renderImages(event);
+});
+
+midImage.addEventListener('click', function(event) {
+  console.log(event.target);
+  console.log(iterations);
+  allItems[imageArray[1]].timesSelected++;
+  iterations++;
+  imageArray = generateNonRepeatingArray();
+  renderImages(event);
+});
+
+rightImage.addEventListener('click', function(event) {
+  console.log(event.target);
+  console.log(iterations);
+  allItems[imageArray[1]].timesSelected++;
+  iterations++;
+  imageArray = generateNonRepeatingArray();
+  renderImages(event);
+});
+
+function createItemTable (){
   var headerArray = ['Item','# Times Presented','# Times Selected','Selection Rate','% of Selections'];
   var tableRowElement = document.createElement('tr');
-  var tableHeaderElement = document.createElement('th');
   for (var i=0; i<headerArray.length; i++) {
+    var tableHeaderElement = document.createElement('th');
     tableHeaderElement.textConent = headerArray[i];
     tableRowElement.appendChild(tableHeaderElement);
   }
   counterTable.appendChild(tableRowElement);
-  for (var i=0; i<allItems; i++){
+  for (i=0; i<allItems; i++){
     allItems[i].fillTable();
   }
 }
+
+createItemTable();
