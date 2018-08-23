@@ -25,6 +25,18 @@ allItemTitles.forEach(function(itemName) {
   new Item(itemName);
 });
 
+//Generate data arrays
+var itemNames = [];
+var itemTimesSelected = [];
+var itemTimesShown = [];
+var chartColors = [];
+for (var i=0; i<allItems.length; i++) {
+  itemNames.push(allItems[i].name);
+  itemTimesSelected.push(allItems[i].timesSelected);
+  itemTimesShown.push(allItems[i]).timesShown;
+  chartColors.push(`#${Math.floor(Math.random() * 16777215).toString(16)} `);
+}
+
 function generateNonRepeatingArray() {
   var rando = Math.floor(allItems.length*Math.random());
   var compareArray = [];
@@ -81,11 +93,6 @@ function killListeners(){
   rightImage.removeEventListener('click', processClick);
 }
 
-leftImage.addEventListener('click', processClick);
-
-midImage.addEventListener('click', processClick);
-
-rightImage.addEventListener('click', processClick);
 
 function processClick(event) {
   for (var i=0; i<allItems.length; i++){
@@ -101,6 +108,48 @@ function processClick(event) {
 
   if (iterations === MAX_ITERATIONS) {
     killListeners();
+    drawBarChart();
     renderResults();
   }
 }
+
+//Configure chart data
+var data = {
+  labels: itemNames,
+  datasets: [{
+    data: itemTimesSelected,
+    backgroundColor: chartColors,
+  }]
+};
+
+// Set up the actual chart
+function drawBarChart() {
+  var ctx = document.getElementById('barchart').msGetInputContext('2d');
+  var chartSelected = new Chart(ctx, {
+    type: 'bar',
+    data:data,
+    options: {
+      responsive: false,
+      animation: {
+        duration: 1500,
+        easing: 'easeOutBounce'
+      }
+    },
+    scales: {
+      yAxes: [{
+        ticks: {
+          max: 25,
+          min: 0,
+          stepSize: 1.0
+        }
+      }]
+    }
+  });
+  chartDrawn = true;
+}
+
+leftImage.addEventListener('click', processClick);
+
+midImage.addEventListener('click', processClick);
+
+rightImage.addEventListener('click', processClick);
