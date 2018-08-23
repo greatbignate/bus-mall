@@ -25,7 +25,7 @@ allItemTitles.forEach(function(itemName) {
   new Item(itemName);
 });
 
-//Generate data arrays
+//Generate data arrays for chart
 var itemNames = [];
 var itemTimesSelected = [];
 var itemTimesShown = [];
@@ -37,18 +37,32 @@ for (var i=0; i<allItems.length; i++) {
   chartColors.push(`#${Math.floor(Math.random() * 16777215).toString(16)} `);
 }
 
+
+
 function generateNonRepeatingArray() {
   var rando = Math.floor(allItems.length*Math.random());
-  var compareArray = [];
   var feederArray = [];
-
   for (var n=0; n<allItems.length; n++) {
     feederArray.push(n);
   }
-  for (var i=0; i<numberImageDisplay; i++){
-    compareArray.push(feederArray[rando]);
-    feederArray.splice(rando,1);
-    rando = Math.floor(feederArray.length*Math.random());
+  if (iterations === 0) {
+    var compareArray = [];
+    for (var i=0; i<numberImageDisplay; i++){
+      compareArray.push(feederArray[rando]);
+      feederArray.splice(rando,1);
+      rando = Math.floor(feederArray.length*Math.random());
+    }
+  } else {
+    compareArray = imageArray;
+    for (i=0; i<compareArray.length; i++) {
+      feederArray.splice(compareArray[i],1);
+      rando = Math.floor(feederArray.length*Math.random());
+    }
+    for (i=0; i<numberImageDisplay; i++){
+      compareArray[i] = feederArray[rando];
+      feederArray.splice(rando,1);
+      rando = Math.floor(feederArray.length*Math.random());
+    }
   }
   return compareArray;
 }
@@ -76,16 +90,41 @@ function renderImages() {
   leftImage.src = allItems[imageArray[0]].path;
   leftImage.title = allItems[imageArray[0]].name;
   allItems[imageArray[0]].timesShown++;
-
+  
   midImage.src = allItems[imageArray[1]].path;
   midImage.title = allItems[imageArray[1]].name;
   allItems[imageArray[1]].timesShown++;
-
+  
   rightImage.src = allItems[imageArray[2]].path;
   rightImage.title = allItems[imageArray[2]].name;
   allItems[imageArray[2]].timesShown++;
 }
-renderImages();
+//renderImages();
+
+//For the local storage to work properly, I need to store timesShown, timesSelected, and iterations for the user to pick up where left off
+
+// var TOTAL_CLICKS = 'total-clicks';
+// if (localStorage.getItem(TOTAL_CLICKS) === null || localStorage.getItem(TOTAL_CLICKS) !== iterations.toString){
+//   document.getElementById(TOTAL_CLICKS).innerText = iterations;
+//   localStorage.setItem(TOTAL_CLICKS,iterations);
+// } else {
+//   var totalClicksFromLocalStorage = localStorage.getItem(TOTAL_CLICKS);
+//   document.getElementById(TOTAL_CLICKS).innerText = totalClicksFromLocalStorage;
+// }
+
+
+// var allStoredItems = JSON.parse(localStorage.getItem('voteCounter'));
+// if (localStorage.getItem('voteCounter') === null) {
+//   imageArray = generateNonRepeatingArray();
+//   renderImages();
+// } else {
+//   for (i = 0; i < allItems.length; i++) {
+//     allItems[i].itemTimesSelected = allStoredItems[i];
+//   }
+//   iterations = JSON.parse(localStorage.getItem('totalClickCount'));
+//   imageArray = generateNonRepeatingArray();
+//   renderImages();
+// }
 
 function killListeners(){
   leftImage.removeEventListener('click', processClick);
@@ -97,56 +136,54 @@ function killListeners(){
 function processClick(event) {
   for (var i=0; i<allItems.length; i++){
     if (allItems[i].name === event.target.title) {
-      console.log(event.target.title);
       allItems[i].timesSelected++;
     }
   }
   imageArray = generateNonRepeatingArray();
   renderImages();
   iterations++;
-  console.log(iterations);
 
   if (iterations === MAX_ITERATIONS) {
     killListeners();
-    drawBarChart();
+    //drawBarChart();
     renderResults();
   }
 }
 
-//Configure chart data
-var data = {
-  labels: itemNames,
-  datasets: [{
-    data: itemTimesSelected,
-    backgroundColor: chartColors,
-  }]
-};
+// //Configure chart data
+// var data = {
+//   labels: itemNames,
+//   datasets: [{
+//     data: itemTimesSelected,
+//     backgroundColor: chartColors,
+//   }]
+// };
 
-// Set up the actual chart
-function drawBarChart() {
-  var ctx = document.getElementById('barchart').msGetInputContext('2d');
-  var chartSelected = new Chart(ctx, {
-    type: 'bar',
-    data:data,
-    options: {
-      responsive: false,
-      animation: {
-        duration: 1500,
-        easing: 'easeOutBounce'
-      }
-    },
-    scales: {
-      yAxes: [{
-        ticks: {
-          max: 25,
-          min: 0,
-          stepSize: 1.0
-        }
-      }]
-    }
-  });
-  chartDrawn = true;
-}
+// // Set up the actual chart
+// function drawBarChart() {
+//   var ctx = document.getElementById('barchart').msGetInputContext('2d');
+//   var chartSelected = new Chart(ctx, {
+//     type: 'bar',
+//     data:data,
+//     options: {
+//       responsive: false,
+//       animation: {
+//         duration: 1500,
+//         easing: 'easeOutBounce'
+//       }
+//     },
+//     scales: {
+//       yAxes: [{
+//         ticks: {
+//           max: 25,
+//           min: 0,
+//           stepSize: 1.0
+//         }
+//       }]
+//     }
+//   });
+//   chartDrawn = true;
+// }
 
 leftImage.addEventListener('click', processClick);
 
