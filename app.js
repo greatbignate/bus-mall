@@ -1,5 +1,6 @@
 'use strict';
 
+// Declare global variables
 var allItems = [];
 var allItemTitles = ['bag','banana','bathroom','boots','breakfast','bubblegum','chair','cthulhu','dog-duck','dragon','pen','pet-sweep','scissors','shark','sweep','tauntaun','unicorn','usb','water-can','wine-glass'];
 var numberImageDisplay = 3;
@@ -9,6 +10,9 @@ var rightImage = document.getElementById('rightimage');
 var counterList = document.getElementById('counterlist');
 var iterations = 0;
 var MAX_ITERATIONS = 26;
+var TOTAL_CLICKS = 'totalclicks';
+var STORE_SELECTION = [];
+var STORE_RANDOM_IMAGES = [];
 
 
 //Create constructor function for SKUs named "Item"
@@ -25,35 +29,91 @@ allItemTitles.forEach(function(itemName) {
   new Item(itemName);
 });
 
-//Generate data arrays
+// This *doodoo* is a *farkling* mess ------------------------------------------------------------------ don't code while drkingkin beer kids ---------------------
+// function checkStoreData () {
+//   if (localStorage.getItem(TOTAL_CLICKS) === null) {
+//     localStorage.setItem(TOTAL_CLICKS, iterations);
+//     for (var i=0; i<allItems.length; i++) {
+//       // localStorage.setItem(STORE_SELECTION[i], allItems[i].timesSelected);
+//     }
+//   } else {
+//     iterations = parseInt(localStorage.getItem(TOTAL_CLICKS));
+//     for (i=0; i<allItems.length; i++) {
+//       // allItems[i].timesSelected = parseInt(localStorage.getItem(STORE_SELECTION[i]));
+//     }
+//     for (i=0;i<numberImageDisplay;i++) {
+//       imageArray[i] = parseInt(localStorage.getItem(STORE_RANDOM_IMAGES[i]));
+//     }
+//   }
+// }
+// checkStoreData();
+
+
+// if (localStorage.getItem(TOTAL_CLICKS) === null || localStorage.getItem(TOTAL_CLICKS) !== iterations.toString){
+//   document.getElementById(TOTAL_CLICKS).innerText = iterations;
+//   localStorage.setItem(TOTAL_CLICKS,iterations);
+// } else {
+//   var totalClicksFromLocalStorage = localStorage.getItem(TOTAL_CLICKS);
+//   document.getElementById(TOTAL_CLICKS).innerText = totalClicksFromLocalStorage;
+// }
+//-------------------------------------------------------------------------------------Stuff works afer this. gtn -------------------------
+
+//Generate data arrays for chart - these are more global variables
 var itemNames = [];
 var itemTimesSelected = [];
 var itemTimesShown = [];
 var chartColors = [];
-for (var i=0; i<allItems.length; i++) {
-  itemNames.push(allItems[i].name);
-  itemTimesSelected.push(allItems[i].timesSelected);
-  itemTimesShown.push(allItems[i]).timesShown;
-  chartColors.push(`#${Math.floor(Math.random() * 16777215).toString(16)} `);
+// Populate above empy global arrays for use in chart
+function updateChartData(){
+  for (var i=0; i<allItems.length; i++) {
+    itemNames.push(allItems[i].name);
+    itemTimesSelected.push(allItems[i].timesSelected);
+    itemTimesShown.push(allItems[i]).timesShown;
+    chartColors.push(`#${Math.floor(Math.random() * 16777215).toString(16)} `);
+  }
+}
+// find largest itemsTimesSelected to scale chart
+function chartScale(){
+  var scale = 0;
+  for (var i=0; i<allItems.length; i++) {
+    if (scale <= allItems.timesSelected){
+      scale = allItems.timesSelected;
+    }
+  }
+  return scale;
 }
 
+//Function to generate an array that does not repeat itself - given the way it's called later it will not repeat its previous calling either.
 function generateNonRepeatingArray() {
   var rando = Math.floor(allItems.length*Math.random());
-  var compareArray = [];
   var feederArray = [];
-
   for (var n=0; n<allItems.length; n++) {
     feederArray.push(n);
   }
-  for (var i=0; i<numberImageDisplay; i++){
-    compareArray.push(feederArray[rando]);
-    feederArray.splice(rando,1);
-    rando = Math.floor(feederArray.length*Math.random());
+  if (iterations === 0) {
+    var compareArray = [];
+    for (var i=0; i<numberImageDisplay; i++){
+      compareArray.push(feederArray[rando]);
+      feederArray.splice(rando,1);
+      rando = Math.floor(feederArray.length*Math.random());
+    }
+  } else {
+    compareArray = imageArray;
+    for (i=0; i<compareArray.length; i++) {
+      feederArray.splice(compareArray[i],1);
+      rando = Math.floor(feederArray.length*Math.random());
+    }
+    for (i=0; i<numberImageDisplay; i++){
+      compareArray[i] = feederArray[rando];
+      feederArray.splice(rando,1);
+      rando = Math.floor(feederArray.length*Math.random());
+    }
   }
   return compareArray;
 }
+var imageArray = generateNonRepeatingArray(); //Defines imageArray outside of a function to be referenced in multiple functions
 
-//Create table function to display click counts -- call later
+//Create function to display click counts in a list
 Item.prototype.tabulateResults = function (){
   var ulEl = document.createElement('ul');
   var liEl = document.createElement('li');
@@ -69,8 +129,6 @@ function renderResults(){
   }
 }
 
-var imageArray = generateNonRepeatingArray(); //Defines imageArray outside of a function to be referenced in multiple functions
-
 // Render three random images into specified HTML list items
 function renderImages() {
   leftImage.src = allItems[imageArray[0]].path;
@@ -85,35 +143,83 @@ function renderImages() {
   rightImage.title = allItems[imageArray[2]].name;
   allItems[imageArray[2]].timesShown++;
 }
-renderImages();
+//renderImages(); -- Line edited out to eliminate repetition error, keep for potential later use
 
+
+// Function to turn off selection of items on click
 function killListeners(){
   leftImage.removeEventListener('click', processClick);
   midImage.removeEventListener('click', processClick);
   rightImage.removeEventListener('click', processClick);
 }
 
-
+// Function to actuate data gathering
+//-------------------------------------------------------------------------look here for local storage stuff not working
 function processClick(event) {
   for (var i=0; i<allItems.length; i++){
     if (allItems[i].name === event.target.title) {
-      console.log(event.target.title);
       allItems[i].timesSelected++;
     }
   }
   imageArray = generateNonRepeatingArray();
   renderImages();
   iterations++;
-  console.log(iterations);
+  localStorage.setItem(TOTAL_CLICKS, iterations);
+  localStorage.setItem(STORE_RANDOM_IMAGES, imageArray);
+  for (i=0; i<allItems.length; i++) {
+    // localStorage.setItem(STORE_SELECTION[i], allItems[i].timesSelected);
+  }
 
-  if (iterations === MAX_ITERATIONS) {
+  if (iterations >= MAX_ITERATIONS) {
     killListeners();
+
+    updateChartData();
+    drawBarChart();
+
     //drawBarChart(); -- Edited out for now while I try to get the local storage bits working
+
     renderResults();
   }
 }
+// ----------------------------------------------------------------------------------last refernce to local storage stuff
 
 //Configure chart data
+
+var data = {
+  labels: itemNames,
+  datasets: [{
+    label: 'Vote Total',
+    data: itemTimesSelected,
+    backgroundColor: chartColors,
+  }]
+};
+
+// Set up the actual chart
+function drawBarChart() {
+  var ctx = document.getElementById('barchart').getContext('2d');
+  //eslint-disable-next-line
+  var chartSelected = new Chart(ctx, {
+    type: 'horizontalBar',
+    data:data,
+    options: {
+      responsive: false,
+      animation: {
+        duration: 1500,
+        easing: 'easeOutBounce'
+      }
+    },
+    scales: {
+      yAxes: [{
+        ticks: {
+          max: chartScale(),
+          min: 0,
+          stepSize: 1.0,
+        }
+      }]
+    }
+  });
+}
+=======
 // var data = {
 //   labels: itemNames,
 //   datasets: [{
@@ -148,8 +254,7 @@ function processClick(event) {
 //   chartDrawn = true;
 // }
 
+// Make the action happen!
 leftImage.addEventListener('click', processClick);
-
 midImage.addEventListener('click', processClick);
-
 rightImage.addEventListener('click', processClick);
