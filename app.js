@@ -11,9 +11,8 @@ var counterList = document.getElementById('counterlist');
 var iterations = 0;
 var MAX_ITERATIONS = 26;
 var TOTAL_CLICKS = 'totalclicks';
-var STORE_SELECTION = [];
-var STORE_RANDOM_IMAGES = [];
-
+var STORE_ALL_ITEMS = [];
+var imageArray = generateNonRepeatingArray();
 
 //Create constructor function for SKUs named "Item"
 function Item(name) {
@@ -29,34 +28,15 @@ allItemTitles.forEach(function(itemName) {
   new Item(itemName);
 });
 
-// This *doodoo* is a *farkling* mess ------------------------------------------------------------------ don't code while drkingkin beer kids ---------------------
-// function checkStoreData () {
-//   if (localStorage.getItem(TOTAL_CLICKS) === null) {
-//     localStorage.setItem(TOTAL_CLICKS, iterations);
-//     for (var i=0; i<allItems.length; i++) {
-//       // localStorage.setItem(STORE_SELECTION[i], allItems[i].timesSelected);
-//     }
-//   } else {
-//     iterations = parseInt(localStorage.getItem(TOTAL_CLICKS));
-//     for (i=0; i<allItems.length; i++) {
-//       // allItems[i].timesSelected = parseInt(localStorage.getItem(STORE_SELECTION[i]));
-//     }
-//     for (i=0;i<numberImageDisplay;i++) {
-//       imageArray[i] = parseInt(localStorage.getItem(STORE_RANDOM_IMAGES[i]));
-//     }
-//   }
-// }
-// checkStoreData();
+//Establish local storage data
+if (localStorage.getItem(TOTAL_CLICKS) === null) {
+  localStorage.setItem(TOTAL_CLICKS, iterations);
+  localStorage.setItem(STORE_ALL_ITEMS, JSON.stringify(allItems));
 
-
-// if (localStorage.getItem(TOTAL_CLICKS) === null || localStorage.getItem(TOTAL_CLICKS) !== iterations.toString){
-//   document.getElementById(TOTAL_CLICKS).innerText = iterations;
-//   localStorage.setItem(TOTAL_CLICKS,iterations);
-// } else {
-//   var totalClicksFromLocalStorage = localStorage.getItem(TOTAL_CLICKS);
-//   document.getElementById(TOTAL_CLICKS).innerText = totalClicksFromLocalStorage;
-// }
-//-------------------------------------------------------------------------------------Stuff works afer this. gtn -------------------------
+} else {
+  iterations = parseInt(localStorage.getItem(TOTAL_CLICKS));
+  allItems = JSON.parse(localStorage.getItem(STORE_ALL_ITEMS));
+}
 
 //Generate data arrays for chart - these are more global variables
 var itemNames = [];
@@ -90,7 +70,7 @@ function generateNonRepeatingArray() {
   for (var n=0; n<allItems.length; n++) {
     feederArray.push(n);
   }
-  if (iterations === 0) {
+  if (iterations === 0 || imageArray === null) {
     var compareArray = [];
     for (var i=0; i<numberImageDisplay; i++){
       compareArray.push(feederArray[rando]);
@@ -111,7 +91,7 @@ function generateNonRepeatingArray() {
   }
   return compareArray;
 }
-var imageArray = generateNonRepeatingArray(); //Defines imageArray outside of a function to be referenced in multiple functions
+imageArray = generateNonRepeatingArray(); //Defines imageArray outside of a function to be referenced in multiple functions
 
 //Create function to display click counts in a list
 Item.prototype.tabulateResults = function (){
@@ -154,7 +134,6 @@ function killListeners(){
 }
 
 // Function to actuate data gathering
-//-------------------------------------------------------------------------look here for local storage stuff not working
 function processClick(event) {
   for (var i=0; i<allItems.length; i++){
     if (allItems[i].name === event.target.title) {
@@ -165,26 +144,17 @@ function processClick(event) {
   renderImages();
   iterations++;
   localStorage.setItem(TOTAL_CLICKS, iterations);
-  localStorage.setItem(STORE_RANDOM_IMAGES, imageArray);
-  for (i=0; i<allItems.length; i++) {
-    // localStorage.setItem(STORE_SELECTION[i], allItems[i].timesSelected);
-  }
+  localStorage.setItem(STORE_ALL_ITEMS, JSON.stringify(allItems));
 
   if (iterations >= MAX_ITERATIONS) {
     killListeners();
-
     updateChartData();
     drawBarChart();
-
-    //drawBarChart(); -- Edited out for now while I try to get the local storage bits working
-
     renderResults();
   }
 }
-// ----------------------------------------------------------------------------------last refernce to local storage stuff
 
 //Configure chart data
-
 var data = {
   labels: itemNames,
   datasets: [{
@@ -219,40 +189,6 @@ function drawBarChart() {
     }
   });
 }
-=======
-// var data = {
-//   labels: itemNames,
-//   datasets: [{
-//     data: itemTimesSelected,
-//     backgroundColor: chartColors,
-//   }]
-// };
-
-// // Set up the actual chart
-// function drawBarChart() {
-//   var ctx = document.getElementById('barchart').msGetInputContext('2d');
-//   var chartSelected = new Chart(ctx, {
-//     type: 'bar',
-//     data:data,
-//     options: {
-//       responsive: false,
-//       animation: {
-//         duration: 1500,
-//         easing: 'easeOutBounce'
-//       }
-//     },
-//     scales: {
-//       yAxes: [{
-//         ticks: {
-//           max: 25,
-//           min: 0,
-//           stepSize: 1.0
-//         }
-//       }]
-//     }
-//   });
-//   chartDrawn = true;
-// }
 
 // Make the action happen!
 leftImage.addEventListener('click', processClick);
