@@ -1,6 +1,26 @@
-* {
-  border: 5px dotted blue;
+body {
+  background-color: lightseagreen;
+  /* background: linear-gradient( -45deg green orange); */
+  color: lightgoldenrodyellow;
+  text-shadow: 2px 0 0 black;
 }
+
+header {
+  text-align: center;
+  font-size: 30px;
+}
+
+ul#imagelist {
+  position: relative;
+  left: 25%;
+}
+
+#imagelist li{
+  margin: 30%;
+  border: 3px solid black;
+}
+
+
 img {
   height: 100px;
   width: 100px;

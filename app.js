@@ -13,7 +13,6 @@ var MAX_ITERATIONS = 26;
 var TOTAL_CLICKS = 'totalclicks';
 var STORE_ALL_ITEMS = [];
 var imageArray = generateNonRepeatingArray();
-// Checking to see if git merge worked
 
 //Create constructor function for SKUs named "Item"
 function Item(name) {
