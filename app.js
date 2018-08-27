@@ -149,13 +149,18 @@ function processClick(event) {
 
   if (iterations >= MAX_ITERATIONS) {
     killListeners();
+
     updateChartData();
     drawBarChart();
+
+    //drawBarChart(); -- Edited out for now while I try to get the local storage bits working
+
     renderResults();
   }
 }
 
 //Configure chart data
+
 var data = {
   labels: itemNames,
   datasets: [{
@@ -190,6 +195,40 @@ function drawBarChart() {
     }
   });
 }
+=======
+// var data = {
+//   labels: itemNames,
+//   datasets: [{
+//     data: itemTimesSelected,
+//     backgroundColor: chartColors,
+//   }]
+// };
+
+// // Set up the actual chart
+// function drawBarChart() {
+//   var ctx = document.getElementById('barchart').msGetInputContext('2d');
+//   var chartSelected = new Chart(ctx, {
+//     type: 'bar',
+//     data:data,
+//     options: {
+//       responsive: false,
+//       animation: {
+//         duration: 1500,
+//         easing: 'easeOutBounce'
+//       }
+//     },
+//     scales: {
+//       yAxes: [{
+//         ticks: {
+//           max: 25,
+//           min: 0,
+//           stepSize: 1.0
+//         }
+//       }]
+//     }
+//   });
+//   chartDrawn = true;
+// }
 
 // Make the action happen!
 leftImage.addEventListener('click', processClick);
