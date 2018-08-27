@@ -13,6 +13,7 @@ var MAX_ITERATIONS = 26;
 var TOTAL_CLICKS = 'totalclicks';
 var STORE_ALL_ITEMS = [];
 var imageArray = generateNonRepeatingArray();
+// Quick comment for git experiment
 
 //Create constructor function for SKUs named "Item"
 function Item(name) {
